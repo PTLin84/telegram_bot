@@ -5,7 +5,7 @@ A minimal Python package for sending Telegram messages from scripts and cron job
 ## Setup
 
 1. Create a bot via [@BotFather](https://t.me/BotFather) and get your token
-2. Get your chat ID via `https://api.telegram.org/bot<TOKEN>/getUpdates`
+2. Get your chat ID via `https://api.telegram.org/bot<TOKEN>/getUpdates` or via [@Get_miidrobot](https://t.me/Get_miidrobot)
 3. Copy `.env.example` to `.env` and fill in your credentials:
 
 ```
