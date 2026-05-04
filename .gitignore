@@ -1,1 +1,3 @@
 .env
+reminders/*.py
+!reminders/example_reminder.py
