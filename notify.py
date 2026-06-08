@@ -9,6 +9,8 @@ Or import and call from other scripts:
     send("hello!")
 """
 
+import io
+import mimetypes
 import os
 import sys
 import urllib.request
@@ -38,6 +40,45 @@ def send(message: str) -> None:
     }).encode()
     req  = urllib.request.Request(url, data=data, method="POST")
     with urllib.request.urlopen(req, timeout=10) as resp:
+        result = json.loads(resp.read())
+    if not result.get("ok"):
+        raise RuntimeError(f"Telegram error: {result}")
+
+
+def send_file(file_path: str, caption: str = "") -> None:
+    """Send a file (document) to Telegram using multipart/form-data."""
+    url      = f"https://api.telegram.org/bot{TOKEN}/sendDocument"
+    path     = Path(file_path)
+    boundary = "----TelegramBoundary"
+
+    def encode_field(name, value):
+        return (
+            f"--{boundary}\r\n"
+            f'Content-Disposition: form-data; name="{name}"\r\n\r\n'
+            f"{value}\r\n"
+        ).encode()
+
+    def encode_file(name, filename, data):
+        mime = mimetypes.guess_type(filename)[0] or "application/octet-stream"
+        return (
+            f"--{boundary}\r\n"
+            f'Content-Disposition: form-data; name="{name}"; filename="{filename}"\r\n'
+            f"Content-Type: {mime}\r\n\r\n"
+        ).encode() + data + b"\r\n"
+
+    body = (
+        encode_field("chat_id", CHAT_ID)
+        + encode_field("parse_mode", "HTML")
+        + (encode_field("caption", caption) if caption else b"")
+        + encode_file("document", path.name, path.read_bytes())
+        + f"--{boundary}--\r\n".encode()
+    )
+
+    req = urllib.request.Request(
+        url, data=body, method="POST",
+        headers={"Content-Type": f"multipart/form-data; boundary={boundary}"}
+    )
+    with urllib.request.urlopen(req, timeout=30) as resp:
         result = json.loads(resp.read())
     if not result.get("ok"):
         raise RuntimeError(f"Telegram error: {result}")

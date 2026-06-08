@@ -1,3 +1,7 @@
 .env
 reminders/*.py
 !reminders/example_reminder.py
+
+__pycache__/
+*.log
+group_reader/messages.db
